@@ -164,12 +164,46 @@ def normalizing(janela):
 
 	return janela
 
-def tabelaZ(janela):
+
+def updateHisto(histo,janela):
+	'''
+	function to update the values of the histogram we are mantaining
+	'''
+	global windowSize
+
+	for j in range(39):
+		aux=np.sum(janela[:,j].astype(np.float64))
+		aux2=aux+histo[j]
+		histo[j]=np.nan_to_num(np.divide(aux2,windowSize))
+
+	return histo
+		
+def tabelaZ(histo):
+	'''
+	get the values of the histogram and pass them to a Z table value
+	'''
+	new={}
+	for i in range(len(histo)):
+		new[i]=st.norm.ppf(histo[i]) ##Z table with mean 0 std 1
+
+	test=np.histogram(new.values(),bins=6)
+
+	return test
 
 
 
+#main
 
+
+
+global windowSize
 windowSize=30
+
+global N
+N=39 #number of features
+
+numberBins=math.ceil(math.sqrt(N))
+
 
 windowsNumber = 0
 globalMax  = []
@@ -181,6 +215,10 @@ janMax  = [] #janela de valores medios. Vou manter N valores
 janMin  = []
 janMean = []
 janStd  = []
+
+histogram = {} #histogram with frequency of the samples
+for j in range(N):
+	histogram[j]=0
 
 files=open('classes-17.out','r')
 lines=files.readlines()
@@ -211,30 +249,17 @@ for i in range(0,len(batch), windowSize): #
 		windowsNumber+=1 #incrementing this number
 		jan = batch[i:i+windowSize]		
 		test=jan
-		localMax,localMin,localMean,localStd = getValues(test)
+		localMax,localMin,localMean,localStd = getValues(jan)
 		#calGlobal(localMax,localMin,localMean,localStd)
 
 		
 		#x.append(normalizing(test))
-		for j in range(39):
-			aux=np.subtract(jan[i][:,j].astype(np.float64),localMin[j])
+		for j in range(N):
+			aux=np.subtract(jan[:,j].astype(np.float64),localMin[j])
 			aux2=np.subtract(localMax[j],localMin[j])
-			jan[i][:,j]=np.divide(aux,aux2)	
+			jan[:,j]=np.divide(aux,aux2)	
 
-
-
-
-
-#### teste diogo com normal em mu=0 std=1
-
-import numpy as np
-from scipy.stats import norm
- 
-
-mu, sigma = 0, 1 # mean and standard deviation
-
-s = np.random.normal(mu, sigma, 1000)
-
-
+		histogram=updateHisto(histogram,test)
+		p=tabelaZ(histogram)
 
 
