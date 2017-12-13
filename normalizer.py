@@ -1,1 +1,240 @@
+import numpy as np
+import scipy.stats as st
+
+def dataPrepare(item):
+	''' get the values, remove the categorical data'''
+	a=item.split(',')
+	label=a[len(a)-1].split('\n')[0]
+	data=a[5:len(a)-2]#removing IPsrc,IPdst,portsrc,portdsc,proto
+	return data
+
+
+# def janela(batch): #janela = [e[i:i+windowSize] for i in range(len(e))]
+# 	''' calculate the sliding windows batch and send to obtain the values'''
+# 	global windowsNumber #to see the number of the windows
+# 	windowsNumber+=1 #incrementing this number
+# 	jan=[]  #take a windows everytime we have a batch
+# 	for i in range(len(batch)): #
+# 		jan.append(batch[i:i+windowSize])
+# 	return jan
+
+
+def getValues(janela):
+	''' take the local values of the current batch'''
+	vmax=[]
+	vmin=[]
+	umean=[]
+	sigmin=[]    
+	for i in range(len(janela[0])):
+		column=janela[:,i].astype(np.float64)
+		vmax.append(max(column))
+		vmin.append(min(column))
+		umean.append(np.mean(column))
+		sigmin.append(np.std(column)) 
+	return vmax,vmin,umean,sigmin
+
+
+# def calGlobal(localMax,localMin,localMean,localStd): 
+# 	'''here we will update the value of the local and calculate the global
+# 	   the values of alpha are to give more importance to the new batches without forget the old values
+# 	   and the division by 2 is to avoid the outliers values
+# 	'''
+# 	global globalMax 
+# 	global globalMin 
+# 	global globalMean
+# 	global globalStd 
+# 	global windowsNumber
+# 	global oldMax  
+# 	global oldMin  
+# 	global oldMean 
+# 	global oldStd  
+
+
+# 	if windowsNumber <= 1: #first case, we dont have anything
+# 		oldMax  = localMax
+# 		oldMin  = localMin
+# 		oldMean = localMean
+# 		oldStd  = localStd
+
+
+# 	alpha1 = 1
+# 	alpha2 = 1
+
+# 	#updating the global values
+# 	#globalMax = ((localMax*alpha1)+(oldMax*alpha2))/2  #ver como hacer esto
+# 	#globalMax = $\alfa*(m\'edia~da~janela) + (1-\alfa)*local_{i-1}$
+
+# 	localMax=map(lambda x: x * alpha1, localMax)
+# 	oldMax=map(lambda x: x * alpha2, oldMax)
+# 	globalMax = map(lambda x,y: float(x+y)/2, localMax,oldMax)
+
+# 	#globalMin = ((localMin*alpha1)+(oldMin*alpha2))/2
+# 	localMin=map(lambda x: x * alpha1, localMin)
+# 	oldMin=map(lambda x: x * alpha2, oldMin)
+# 	globalMin = map(lambda x,y: float(x+y)/2, localMin,oldMin)
+
+# 	#globalMean = ((localMean*alpha1)+(oldMean*alpha2))/2
+# 	localMean=map(lambda x: x * alpha1, localMean)
+# 	oldMean=map(lambda x: x * alpha2, oldMean)
+# 	globalMean = map(lambda x,y: float(x+y)/2, localMean,oldMean)
+
+
+# 	#globalStd = ((localStd*alpha1)+(oldStd*alpha2))/2
+# 	localStd=map(lambda x: x * alpha1, localStd)
+# 	oldStd=map(lambda x: x * alpha2, oldStd)
+# 	globalStd = map(lambda x,y: float(x+y)/2, localStd,oldStd)
+
+
+# 	#updating old values with new ones
+
+# 	oldMax  = localMax
+# 	oldMin  = localMin
+# 	oldMean = localMean
+# 	oldStd  = localStd
+
+
+
+def calGlobal(localMax,localMin,localMean,localStd): 
+	'''here we will update the value of the local and calculate the global
+	   the values of alpha are to give more importance to the new batches without forget the old values
+	'''
+	global globalMax #final values, after calculate the equ. this is gonna be a 1*n (n==len(batch[0]))
+	global globalMin 
+	global globalMean
+	global globalStd 
+	global windowsNumber #only to keep the value of the windows, could be deleted
+	global janMax  #windows with averages values
+	global janMin  
+	global janMean 
+	global janStd  
+	
+	alpha1 = 0.9
+
+	n = len(janMax) # should be # number of elements to take into the mean windows
+	
+
+	if n < 5: #first case, we dont have anything
+	 	if n == 0:
+			janMax.append(localMax)
+ 			globalMax.append(localMax)
+ 			janMin.append(localMin)
+ 			globalMin.append(localMin)
+	 	else:
+	 		janMax.append(localMax)
+	 		janMin.append(localMin)
+
+	else: #to keep only 5 values in the window
+		janMax.pop(0)
+		janMax.append(localMax)
+		janMin.pop(0)
+		janMin.append(localMin)
+	
+	auxMax=np.array(janMax)
+	auxMin=np.array(janMin)
+
+	auxTestMax=[]
+	auxTestMin=[]
+	
+	for i in range(39):
+		janelaMediaMax= float(sum(auxMax[:,i][0:len(auxMax)])/float(len(auxMax))) # sum of a from 0 index to 9 index. sum(a) == sum(a[0:len(a)]
+		janelaMediaMin= float(sum(auxMin[:,i][0:len(auxMin)])/float(len(auxMin))) # sum of a from 0 index to 9 index. sum(a) == sum(a[0:len(a)]
+
+		auxTestMax.append((janelaMediaMax*alpha1)+((1-alpha1)*localMax[i]))
+		auxTestMin.append((janelaMediaMin*alpha1)+((1-alpha1)*localMin[i]))
+
+	globalMax[0]=auxTestMax
+	globalMin[0]=auxTestMin
+	
+def normalizing(janela):
+	# normalized = (x-min(x))/(max(x)-min(x))
+
+	global globalMax 
+	global globalMin 
+	global globalMean
+	global globalStd 
+
+	for i in range(39):
+		aux=np.subtract(janela[:,i].astype(np.float64),globalMin[0][i])
+		aux2=np.subtract(globalMax[0][i],globalMin[0][i])
+		if (aux2 == 0):
+			janela[:,i]=0.5 #https://docs.tibco.com/pub/spotfire/7.0.0/doc/html/norm/norm_scale_between_0_and_1.htm
+			#If Emax is equal to Emin then Normalized (ei) is set to 0.5.
+		else:
+			janela[:,i]=np.nan_to_num(np.divide(aux,aux2).tolist())
+
+	return janela
+
+def tabelaZ(janela):
+
+
+
+
+windowSize=30
+
+windowsNumber = 0
+globalMax  = []
+globalMin  = []
+globalMean = []
+globalStd  = []
+
+janMax  = [] #janela de valores medios. Vou manter N valores 
+janMin  = []
+janMean = []
+janStd  = []
+
+files=open('classes-17.out','r')
+lines=files.readlines()
+
+np.set_printoptions(precision=3)
+np.set_printoptions(suppress=True,formatter={'float_kind':'{:f}'.format})
+
+batch=[]
+a=lines[0:10000]
+for i in lines:
+   batch.append(dataPrepare(i))
+
+before=batch
+batch=np.array(batch)
+
+
+alpha1 = 0.9
+
+x=[]
+#def janela(batch): #janela = [e[i:i+windowSize] for i in range(len(e))]
+''' calculate the sliding windows batch and send to obtain the values'''
+global windowsNumber #to see the number of the windows
+#windowsNumber+=1 #incrementing this number
+jan=[]  #take a windows everytime we have a batch
+test=[]
+
+for i in range(0,len(batch), windowSize): #
+		windowsNumber+=1 #incrementing this number
+		jan = batch[i:i+windowSize]		
+		test=jan
+		localMax,localMin,localMean,localStd = getValues(test)
+		#calGlobal(localMax,localMin,localMean,localStd)
+
+		
+		#x.append(normalizing(test))
+		for j in range(39):
+			aux=np.subtract(jan[i][:,j].astype(np.float64),localMin[j])
+			aux2=np.subtract(localMax[j],localMin[j])
+			jan[i][:,j]=np.divide(aux,aux2)	
+
+
+
+
+
+#### teste diogo com normal em mu=0 std=1
+
+import numpy as np
+from scipy.stats import norm
+ 
+
+mu, sigma = 0, 1 # mean and standard deviation
+
+s = np.random.normal(mu, sigma, 1000)
+
+
+
 
