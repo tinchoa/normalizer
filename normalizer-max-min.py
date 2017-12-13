@@ -9,16 +9,6 @@ def dataPrepare(item):
 	return data
 
 
-# def janela(batch): #janela = [e[i:i+windowSize] for i in range(len(e))]
-# 	''' calculate the sliding windows batch and send to obtain the values'''
-# 	global windowsNumber #to see the number of the windows
-# 	windowsNumber+=1 #incrementing this number
-# 	jan=[]  #take a windows everytime we have a batch
-# 	for i in range(len(batch)): #
-# 		jan.append(batch[i:i+windowSize])
-# 	return jan
-
-
 def getValues(janela):
 	''' take the local values of the current batch'''
 	vmax=[]
@@ -32,66 +22,6 @@ def getValues(janela):
 		umean.append(np.mean(column))
 		sigmin.append(np.std(column)) 
 	return vmax,vmin,umean,sigmin
-
-
-# def calGlobal(localMax,localMin,localMean,localStd): 
-# 	'''here we will update the value of the local and calculate the global
-# 	   the values of alpha are to give more importance to the new batches without forget the old values
-# 	   and the division by 2 is to avoid the outliers values
-# 	'''
-# 	global globalMax 
-# 	global globalMin 
-# 	global globalMean
-# 	global globalStd 
-# 	global windowsNumber
-# 	global oldMax  
-# 	global oldMin  
-# 	global oldMean 
-# 	global oldStd  
-
-
-# 	if windowsNumber <= 1: #first case, we dont have anything
-# 		oldMax  = localMax
-# 		oldMin  = localMin
-# 		oldMean = localMean
-# 		oldStd  = localStd
-
-
-# 	alpha1 = 1
-# 	alpha2 = 1
-
-# 	#updating the global values
-# 	#globalMax = ((localMax*alpha1)+(oldMax*alpha2))/2  #ver como hacer esto
-# 	#globalMax = $\alfa*(m\'edia~da~janela) + (1-\alfa)*local_{i-1}$
-
-# 	localMax=map(lambda x: x * alpha1, localMax)
-# 	oldMax=map(lambda x: x * alpha2, oldMax)
-# 	globalMax = map(lambda x,y: float(x+y)/2, localMax,oldMax)
-
-# 	#globalMin = ((localMin*alpha1)+(oldMin*alpha2))/2
-# 	localMin=map(lambda x: x * alpha1, localMin)
-# 	oldMin=map(lambda x: x * alpha2, oldMin)
-# 	globalMin = map(lambda x,y: float(x+y)/2, localMin,oldMin)
-
-# 	#globalMean = ((localMean*alpha1)+(oldMean*alpha2))/2
-# 	localMean=map(lambda x: x * alpha1, localMean)
-# 	oldMean=map(lambda x: x * alpha2, oldMean)
-# 	globalMean = map(lambda x,y: float(x+y)/2, localMean,oldMean)
-
-
-# 	#globalStd = ((localStd*alpha1)+(oldStd*alpha2))/2
-# 	localStd=map(lambda x: x * alpha1, localStd)
-# 	oldStd=map(lambda x: x * alpha2, oldStd)
-# 	globalStd = map(lambda x,y: float(x+y)/2, localStd,oldStd)
-
-
-# 	#updating old values with new ones
-
-# 	oldMax  = localMax
-# 	oldMin  = localMin
-# 	oldMean = localMean
-# 	oldStd  = localStd
-
 
 
 def calGlobal(localMax,localMin,localMean,localStd): 
@@ -182,11 +112,20 @@ def tabelaZ(histo):
 	'''
 	get the values of the histogram and pass them to a Z table value
 	'''
+	
 	new={}
-	for i in range(len(histo)):
-		new[i]=st.norm.ppf(histo[i]) ##Z table with mean 0 std 1
+	aux=0
+	for i in range(len(histogram)):
+		for j in range(len(histogram)):
+			if histogram[i] > histogram[j]: #check the values with minor relative frequency 
+				aux+=histogram[j] #then sum
+			else:
+				aux=histogram[i]
+		print aux
+		new[i]=st.norm.ppf(aux) ##Z table with mean 0 std 1
+		aux=0
 
-	test=np.histogram(new.values(),bins=6)
+	j=np.histogram(new.values(),bins=6)
 
 	return test
 
