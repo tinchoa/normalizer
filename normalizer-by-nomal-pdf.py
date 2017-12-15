@@ -25,7 +25,7 @@ def getValues(janela):
 	return vmax,vmin,umean,sigmin
 
 
-def createBins(localMax,localMin):
+def createBins(localMax,localMin,janela):
 	'''
 	function to create the limits of each bin. Each column is composed of numberBins=math.ceil(math.sqrt(N))
 	we will have 2 list, one with the max-min of each bean, and one withe the values of the bins
@@ -35,12 +35,16 @@ def createBins(localMax,localMin):
 
 	bins=[]
 	columns={}
+	frequency={}
 	for i in range(N):
 		pivote=(localMax[i]-localMin[i])/numberBins
 		aux=localMin[i]
 		for j in range(int(numberBins)):
 			bins.append([aux,aux+pivote])
 			aux+=pivote
+			x = [k for k in janela[:,k] if i>aux and i<aux+pivote]
+			frequency[j]=x #ver si esto esta funcionando
+			x=0		
 		columns[i]=bins
 		bins=[]
 
