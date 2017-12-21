@@ -37,42 +37,47 @@ def createBins(localMax,localMin,janela):
 	columns={}
 	frequency={}
 	for i in range(N):
-		pivote=(localMax[i]-localMin[i])/numberBins
+		pivote=(localMax[i]-localMin[i])/(numberBins)
+		pivote=np.ceil(pivote) #to round
 		aux=localMin[i]
 		for j in range(int(numberBins)):
 			bins.append([aux,aux+pivote])
 			aux+=pivote
-			x = [k for k in janela[:,k] if i>aux and i<aux+pivote]
-			frequency[j]=x #ver si esto esta funcionando
-			x=0		
+		bins.append([aux,localMax[i]+pivote]) #adding the last value as max
 		columns[i]=bins
 		bins=[]
 
-	return columns
+	return columns 
 
 
-def createHistogram(janela,columns):
+def createHistogram(janela,bins):
 	'''
 	aqui devo percorrer os valores das amostras e ver em que bin cai
 	con eso devo crear nuevos bins con los valores
 	'''
-
-	###como esta ahora esta errado, deveria crear nuevos bins, una estructura similar a la colums
-	new=[]
-	flag=0
-	for i in range(N): #columns
-		col=[]
-		for j in range(windowSize): #number of samples
-			sample=janela[:,i][j]
-			for k in range(int(numberBins)): #number of bins
-				bind=[]
-				if (columns[i][k][0] >= sample.astype(np.float64) <= columns[i][k][1]): # and flag ==0:
-					bind.append(sample.astype(np.float64))
-					#flag=1
-			col.append(bind)
-		new.append(col)
-			#if  flag == 0: # that's mean the value didn't enter in any bin 
-
+	global numberBins
+	global N
+	new={}
+	aux=[]
+	for i in range(N): #percorrer as colunas
+		new[i]=[]
+		for j in range(int(numberBins)+1): #num of bins
+				p=[x.astype(np.float64) for x in jan[:,i] if x.astype(np.float64) >= bins[i][j][0] and x.astype(np.float64) < bins[i][j][1]] #to see how many values we have in each bin
+				aux.append(len(p))
+				# var=0 #ver eso aqui
+				# for x in janela[:,i]:
+				# 	if (x.astype(np.float64) >= columns[i][j][0] and x.astype(np.float64) < columns[i][j][1]):
+				#  		var+=1
+				#  		flag=1
+				#  	else:
+				#  		flag=0
+				# if flag==0:
+				# 	g+=1
+				# aux.append(var)
+				# var=0
+			#p=[x.astype(np.float64) for x in janela[:,i] if x.astype(np.float64) >= columns[i][j][0]  and x.astype(np.float64) < columns[i][j][1]] #to see how many values we have in each bin
+		new[i]=aux
+		aux=[]
 
 	return new
 
@@ -86,6 +91,7 @@ windowSize=50
 global N
 N=39 #number of features
 
+global numberBins
 numberBins=math.ceil(math.sqrt(N))
 
 windowsNumber = 0
@@ -118,16 +124,35 @@ global windowsNumber #to see the number of the windows
 #windowsNumber+=1 #incrementing this number
 jan=[]  #take a windows everytime we have a batch
 
-columns={}
+frequency={}
+binsTotal={}
 
+b=[]
 
 for i in range(0,len(batch), windowSize): #
-		windowsNumber+=1 #incrementing this number
 		
 		jan = batch[i:i+windowSize]		
 		
 		localMax,localMin,localMean,localStd = getValues(jan)
 		
-		columns[windowsNumber]=createBins(localMax,localMin)
+		binsTotal[windowsNumber]=createBins(localMax,localMin,jan)
+		#,frequency[windowsNumber]
 
-		x.append(createHistogram(jan,columns[windowsNumber]))
+		x.append(createHistogram(jan,binsTotal[windowsNumber]))
+	
+		windowsNumber+=1 #incrementing this number
+
+
+
+t=0
+for i in range(len(x)):
+	for j in x[i]:
+		if (x[i][j].count(0)==numberBins+1):
+			f=50
+		else:
+			f=sum(x[i][j])
+		t+=f
+		if f != 50:
+			print i,j
+			print f
+
