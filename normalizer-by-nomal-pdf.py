@@ -82,7 +82,46 @@ def createHistogram(janela,bins):
 	return new
 
 
+def relativeFreq(histogram, numberSamples):
+	'''
+	function to create the relative frequenci of each bin
 
+	'''
+	relative={}
+	aux=[]
+	for feature in range(len(histogram)):
+		relative[feature]=[]
+		#for feature in histogram[windows]:
+		for bins in histogram[feature]:
+		#	print bins
+			#aux.append(bins/float(numberSamples)) #isso aqui esta dando muito baixo (e acava caindo tudo perto de zero)
+			aux.append(bins/float(50)) #numeros de amostras no bin
+		relative[feature]=aux
+		aux=[]
+		#		histogram[feature][bins]
+				#p=[x.astype(np.float64) for x in jan[:,i] if x.astype(np.float64) >= bins[i][j][0] and x.astype(np.float64) < bins[i][j][1]]
+
+	return relative
+
+def calculateZ(relative):
+	'''
+	'''
+	global N
+	Z={}
+	aux=[]
+	for windows in range(N):
+		Z[windows]=[]
+		#for feature in relative[windows]:
+		for bins in relative[windows]:
+			if (bins == 0.0):
+				aux.append(st.norm.cdf(0))
+			else:
+				p=filter(lambda x : x < bins, relative[windows])
+				aux.append(st.norm.cdf(sum(p)))
+		Z[windows]=aux
+		aux=[]
+
+	return Z
 
 
 global windowSize
@@ -90,6 +129,9 @@ windowSize=50
 
 global N
 N=39 #number of features
+
+global numberSamples
+numberSamples=1
 
 global numberBins
 numberBins=math.ceil(math.sqrt(N))
@@ -99,9 +141,9 @@ windowsNumber = 0
 janMax  = [] #janela de valores medios. Vou manter N valores 
 janMin  = []
 
-histogram = {} #histogram with frequency of the samples
-for j in range(N):
-	histogram[j]=0
+# histogram = {} #histogram with frequency of the samples
+# for j in range(N):
+# 	histogram[j]=0
 
 files=open('classes-17.out','r')
 lines=files.readlines()
@@ -117,7 +159,7 @@ for i in a:
 before=batch
 batch=np.array(batch)
 
-x=[]
+histogram={}
 #def janela(batch): #janela = [e[i:i+windowSize] for i in range(len(e))]
 ''' calculate the sliding windows batch and send to obtain the values'''
 global windowsNumber #to see the number of the windows
@@ -127,7 +169,10 @@ jan=[]  #take a windows everytime we have a batch
 frequency={}
 binsTotal={}
 
-b=[]
+relative={}
+
+Zvalues={}
+
 
 for i in range(0,len(batch), windowSize): #
 		
@@ -138,21 +183,30 @@ for i in range(0,len(batch), windowSize): #
 		binsTotal[windowsNumber]=createBins(localMax,localMin,jan)
 		#,frequency[windowsNumber]
 
-		x.append(createHistogram(jan,binsTotal[windowsNumber]))
+		histogram[windowsNumber]=(createHistogram(jan,binsTotal[windowsNumber]))
 	
+		if windowsNumber==0:
+			numberSamples= (N*windowSize)
+		else:
+			numberSamples=(N*windowSize*windowsNumber)
+
+		relative[windowsNumber]=(relativeFreq(histogram[windowsNumber],numberSamples))
+
+		Zvalues[windowsNumber]=(calculateZ(relative[windowsNumber]))
+
 		windowsNumber+=1 #incrementing this number
 
 
 
-t=0
-for i in range(len(x)):
-	for j in x[i]:
-		if (x[i][j].count(0)==numberBins+1):
-			f=50
-		else:
-			f=sum(x[i][j])
-		t+=f
-		if f != 50:
-			print i,j
-			print f
+# t=0
+# for i in range(len(histogram)):
+# 	for j in histogram[i]:
+# 		if (histogram[i][j].count(0)==numberBins+1):
+# 			f=50
+# 		else:
+# 			f=sum(histogram[i][j])
+# 		t+=f
+# 		if f != 50:
+# 			print i,j
+# 			print f
 
