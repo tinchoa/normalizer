@@ -166,16 +166,9 @@ def relativeFreq(histogram, numberSamples):
 	aux={}
 	for feature in range(len(histogram)):
 		aux[feature] = {k: [] for k in range(len(histogram[feature]))} #initialize dict of list
-
 		for bins in range(len(histogram[feature])):
-		#	print bins
-			#aux.append(bins/float(numberSamples)) #isso aqui esta dando muito baixo (e acava caindo tudo perto de zero)
-			aux[feature][bins]=(histogram[feature][bins]/float(50)) #numeros de amostras no bin
-		#relative[feature][bins]=aux[feature][bins]
-		#aux=[]
-		#		histogram[feature][bins]
-				#p=[x.astype(np.float64) for x in jan[:,i] if x.astype(np.float64) >= bins[i][j][0] and x.astype(np.float64) < bins[i][j][1]]
-
+			aux[feature][bins]=(histogram[feature][bins]/float(numberSamples)) #numeros de amostras no bin
+		
 	return aux
 
 
@@ -188,11 +181,11 @@ def calculateZ(relative):
 		Z[feature] = {k: [] for k in range(len(relative[feature]))} #initialize dict of list
 		#for feature in relative[windows]:
 		for bins in relative[feature]:
-			if (relative[feature][bins] == 0.0):
-				Z[feature][bins]=(st.norm.cdf(0))
-			else:
-				p=filter(lambda x : x < relative[feature][bins], relative[feature].values())
-				Z[feature][bins]=st.norm.cdf(sum(p))
+			#if (relative[feature][bins] == 0.0): #if it's zero do not need to sum anything
+			#	Z[feature][bins]=(st.norm.cdf(0))
+			#else:
+			p=filter(lambda x : x < relative[feature][bins], relative[feature].values()) #check the values of bins smaller than the current one
+			Z[feature][bins]=st.norm.cdf(sum(p))
 		
 	return Z
 
@@ -207,6 +200,23 @@ def backZ2values(rawValues,Zvalues):
 			newValues[feature][bins]=map(lambda x: Zvalues[feature][bins],rawValues[feature][bins])
 
 	return newValues
+
+def return2dataset(janela,rawValues,newValues):
+	'''
+	this function will map the original values in the dataset with the values of the Z
+	'''
+	for feature in range(len(janela[0])): #percorrer as colunas
+		for bins in range(len(rawValues[feature])): #num of bins
+			for x in range(len(janela[:,feature])):
+				if float(janela[x,feature]) in rawValues[feature][bins]:
+						janela[x,feature] = newValues[feature][bins][0]
+
+	return janela
+
+
+
+
+				
 
 
 
@@ -263,6 +273,8 @@ Zvalues={}
 
 newValues={}
 
+final={}
+
 for i in range(0,len(batch), windowSize): #
 		
 		jan = batch[i:i+windowSize]		
@@ -280,10 +292,10 @@ for i in range(0,len(batch), windowSize): #
 			histogram,rawValues=(updateHistogram(jan,binsTotal,histogram,rawValues))
 			
 			relative=(relativeFreq(histogram,numberSamples))
-
 			Zvalues=(calculateZ(relative))
-
 			newValues=backZ2values(rawValues,Zvalues)
+
+		final=return2dataset(jan,rawValues,newValues)
 
 	 	windowsNumber+=1 #incrementing this number
 
