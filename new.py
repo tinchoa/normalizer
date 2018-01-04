@@ -218,9 +218,11 @@ def return2dataset(janela,rawValues,newValues):
 
 				
 
+global windowsNumber #to see the number of the windows
+windowsNumber = 0
 
 
-global windowSize
+global windowSize 
 windowSize=50
 
 global N
@@ -232,7 +234,6 @@ numberSamples=1
 global numberBins
 numberBins=math.ceil(math.sqrt(N))
 
-windowsNumber = 0
 
 janMax  = [] #janela de valores medios. Vou manter N valores 
 janMin  = []
@@ -255,25 +256,19 @@ for i in a:
 before=batch
 batch=np.array(batch)
 
-histogram={}
-#def janela(batch): #janela = [e[i:i+windowSize] for i in range(len(e))]
-''' calculate the sliding windows batch and send to obtain the values'''
-global windowsNumber #to see the number of the windows
-#windowsNumber+=1 #incrementing this number
+histogram={}  #here are the histogram diveded in feature. Each feature has N bins
+
 jan=[]  #take a windows everytime we have a batch
 
-frequency={}
-#binsTotal=
+rawValues={} #dictionary of features with original values diveded by bins
 
-relative={}
+relative={} #dictionary of features with relative frequency of each bins (frequency of the bin/totalSamples)
 
-rawValues={}
+Zvalues={} #dictionary of features with Zvalues of each bins  (Z>P\left (x=\sum_{j}^{i} f_q_i \right ))
 
-Zvalues={}
+newValues={} #dictionary of features with maps between Zvalues and real values
 
-newValues={}
-
-final={}
+final={} #this must be the final normalized result
 
 for i in range(0,len(batch), windowSize): #
 		
