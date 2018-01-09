@@ -9,9 +9,6 @@ def dataPrepare(item):
 	data=a[5:len(a)-2]#removing IPsrc,IPdst,portsrc,portdsc,proto
 	return data
 
-def isclose(a, b, rel_tol=1e-09, abs_tol=0.0): #comparacao entre float
-    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
-
 
 def getValues(janela):
 	''' take the local values of the current batch'''
@@ -27,7 +24,7 @@ def getValues(janela):
 		vmin.append(localMin)
 		umean.append(np.mean(column))
 		sigmin.append(np.std(column)) 
-		
+	
 	return vmax,vmin,umean,sigmin
 
 
@@ -80,25 +77,25 @@ def updateBins(localMax,localMin,binsTotal):
 				aux=localMin[feature]
 				bins.append([aux,aux+pivote])
 				aux+=pivote
-				if (localMax[feature]+pivote > aux):
-					bins.append([aux,localMax[feature]+pivote]) #adding the last value as max
-				else:
-					bins.append([aux,aux+localMax[feature]]) #adding the last value as max
+				#if (localMax[feature]+pivote > aux):
+				bins.append([aux,localMax[feature]+pivote]) #adding the last value as max
+				#else:
+				#	bins.append([aux,aux+localMax[feature]]) #adding the last value as max
 				binsTotal[feature]=bins
 				bins=[]
 			else:
-				if (isclose(localMax[feature],binsTotal[feature][-1][1]) and localMax[feature] > binsTotal[feature][len(binsTotal[feature])-1][1]): ##compara aqui
-				#print "max passed"
+				if (localMax[feature] > binsTotal[feature][-1][1]): 
 					pivote=(binsTotal[feature][0][1]-binsTotal[feature][0][0])
 					if pivote == 0:
 						pivote = 1.0
 					preMax=binsTotal[feature][-1][1]
-					if (localMax[feature] - preMax > 500 ): ##isso aqui eh para acelerar senao fica muito gigante,
-						pivote=500 #o que poderia ser mais inteligente? K veces o tamanho do pivote * (numero de bins)
-					while (preMax <= localMax[feature]): #isso deveria mudar unicamente qdo os valores de max-min mudem
-						binsTotal[feature].append([preMax,preMax+pivote])  #aqui hay un error 
+					if (localMax[feature] - preMax > (pivote*numberBins)): ##isso aqui eh para acelerar senao fica muito gigante,
+						pivote=pivote*numberBins 
+					while (preMax <= localMax[feature]+pivote): #isso deveria mudar unicamente qdo os valores de max-min mudem
+						binsTotal[feature].append([preMax,preMax+pivote])  #aqui tem error 
 						preMax+=pivote
-				if ( isclose(localMin[feature],binsTotal[feature][0][0]) and localMin[feature] < binsTotal[feature][0][0]): #aqui tb
+					binsTotal[feature].append([preMax,preMax+pivote])  #aqui tem error 
+				if (localMin[feature] < binsTotal[feature][0][0]): 
 				#"print min passed"
 					binsTotal[feature].insert(0,[localMin[feature],binsTotal[feature][0][0]])   
 
@@ -118,10 +115,10 @@ def createHistogram(janela,bins):
 	for feature in range(N): #percorrer as colunas
 		values[feature] = {k: [] for k in range(int(numberBins)+1)} #initialize dict of list
 		new[feature] = {k: 0 for k in range(int(numberBins)+1)} #initialize dict of list
-		for j in range(int(numberBins)+1): #num of bins
-			p=[x.astype(np.float64) for x in jan[:,feature] if x.astype(np.float64) >= bins[feature][j][0] and x.astype(np.float64) < bins[feature][j][1]] #to see how many values we have in each bin
-			new[feature][j]=len(p)
-			values[feature][j].append(p)
+		for b in range(int(numberBins)+1): #num of bins
+			p=[x.astype(np.float64) for x in janela[:,feature] if x.astype(np.float64) >= bins[feature][b][0] and x.astype(np.float64) < bins[feature][b][1]] #to see how many values we have in each bin
+			new[feature][b]=len(p)
+			values[feature][b]=(p)
 			#aux2.append(p)
 			#aux.append(len(p))
 		#new[i]={j:aux}
@@ -141,22 +138,21 @@ def updateHistogram(janela,bins,new,values):
 	aux={}
 	for feature in range(N): #percorrer as colunas
 		aux[feature] = {k: [] for k in range(len(bins[feature]))} #initialize dict of list
-		for bind in range(len(bins[feature])): #num of bins
+		for b in range(len(bins[feature])): #num of bins
 			#	p=[x.astype(np.float64) for x in jan[:,i] if x.astype(np.float64) >= bins[i][j][0] and x.astype(np.float64) < bins[i][j][1]] #to see how many values we have in each bin
 			var=0 
 			for x in janela[:,feature]:
-				if (x.astype(np.float64) >= bins[feature][bind][0] and x.astype(np.float64) < bins[feature][bind][1]):
+				if (x.astype(np.float64) >= bins[feature][b][0] and x.astype(np.float64) < bins[feature][b][1]):
 					var+=1
-					aux[feature][bind].append(x.astype(np.float64))
-			if bind in values[feature].keys(): #That means that we increased the bins
-				new[feature][bind]=new[feature][bind]+var
-				values[feature][bind]=values[feature][bind]+aux[feature][bind]
-				
+					aux[feature][b].append(x.astype(np.float64))
+			if b in values[feature].keys(): #That means that we increased the bins
+				new[feature][b]=new[feature][b]+var
+				values[feature][b]=values[feature][b]+aux[feature][b]
 			else:
-				new[feature][bind]=var #so we need to add the new values
-				values[feature][bind]=aux[feature][bind]
+				new[feature][b]=var #so we need to add the new values
+				values[feature][b]=aux[feature][b]
 			var=0
-			aux[feature][bind]=[]
+			aux[feature][b]=[]
 	return new,values
 
 
@@ -212,7 +208,6 @@ def return2dataset(janela,rawValues,newValues):
 			for x in range(len(janela[:,feature])):
 				if float(janela[x,feature]) in rawValues[feature][bins]:
 						janela[x,feature] = newValues[feature][bins][0]
-
 	return janela
 
 
@@ -272,6 +267,7 @@ newValues={} #dictionary of features with maps between Zvalues and real values
 
 final={} #this must be the final normalized result
 
+gg=0
 for i in range(0,len(batch), windowSize): #
 		
 		jan = batch[i:i+windowSize]		
@@ -288,25 +284,29 @@ for i in range(0,len(batch), windowSize): #
 			numberSamples=(N*windowSize*windowsNumber)
 			histogram,rawValues=(updateHistogram(jan,binsTotal,histogram,rawValues))
 			
-			relative=(relativeFreq(histogram,numberSamples))
-			Zvalues=(calculateZ(relative))
-			newValues=backZ2values(rawValues,Zvalues)
+		#	relative=(relativeFreq(histogram,numberSamples))
+		#	Zvalues=(calculateZ(relative))
+		#	newValues=backZ2values(rawValues,Zvalues)
 
-		final=return2dataset(jan,rawValues,newValues)
-
+		#final=return2dataset(jan,rawValues,newValues)
+		print rawValues[23]
+		gg+=jan[:,23].tolist().count('14')
+		print gg
+		print windowsNumber
+		print localMax[23]
 	 	windowsNumber+=1 #incrementing this number
 
 
 
-# t=0
-# for i in range(len(histogram)):
-# 	for j in histogram[i]:
-# 		if (histogram[i].values().count(0) > 7):
-# 			f=1000
-# 		else:
-# 			f=sum(histogram[i].values())
-# 	t+=f
-# 	if f != 1000:
-# 		print i
-# 		print f
+t=0
+for i in range(len(histogram)):
+	for j in histogram[i]:
+		#if (histogram[i].values().count(0) > 7):
+		#	f=1000
+		#else:
+		f=sum(histogram[i].values())
+	t+=f
+	if f != 1000:
+		print i
+		print f
 
