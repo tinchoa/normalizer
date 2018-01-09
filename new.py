@@ -9,6 +9,9 @@ def dataPrepare(item):
 	data=a[5:len(a)-2]#removing IPsrc,IPdst,portsrc,portdsc,proto
 	return data
 
+def isclose(a, b, rel_tol=1e-09, abs_tol=0.0): #comparacao entre float
+    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+
 
 def getValues(janela):
 	''' take the local values of the current batch'''
@@ -64,7 +67,6 @@ def updateBins(localMax,localMin,binsTotal):
 	this function will update the boundaries of the bins of each column, in case it is lower/max than the current values 
 	we will create new bins
 	'''
-
 	global numberBins
 	for feature in binsTotal:
 		for bins in range(len(binsTotal[feature])):
@@ -85,18 +87,18 @@ def updateBins(localMax,localMin,binsTotal):
 				binsTotal[feature]=bins
 				bins=[]
 			else:
-				if localMax[feature] > binsTotal[feature][len(binsTotal[feature])-1][1]:
+				if (isclose(localMax[feature],binsTotal[feature][-1][1]) and localMax[feature] > binsTotal[feature][len(binsTotal[feature])-1][1]): ##compara aqui
 				#print "max passed"
 					pivote=(binsTotal[feature][0][1]-binsTotal[feature][0][0])
 					if pivote == 0:
-						pivote =1.0
-					preMax=binsTotal[feature][len(binsTotal[feature])-1][1]
-					if (localMax[feature] - preMax > 500 ): ##isso aqui é para acelerar senao fica muito gigante,
-						pivote=500 #o que poderia ser mais inteligente?
+						pivote = 1.0
+					preMax=binsTotal[feature][-1][1]
+					if (localMax[feature] - preMax > 500 ): ##isso aqui eh para acelerar senao fica muito gigante,
+						pivote=500 #o que poderia ser mais inteligente? K veces o tamanho do pivote * (numero de bins)
 					while (preMax <= localMax[feature]): #isso deveria mudar unicamente qdo os valores de max-min mudem
 						binsTotal[feature].append([preMax,preMax+pivote])  #aqui hay un error 
 						preMax+=pivote
-				if localMin[feature] < binsTotal[feature][0][0]:
+				if ( isclose(localMin[feature],binsTotal[feature][0][0]) and localMin[feature] < binsTotal[feature][0][0]): #aqui tb
 				#"print min passed"
 					binsTotal[feature].insert(0,[localMin[feature],binsTotal[feature][0][0]])   
 
