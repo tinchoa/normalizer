@@ -178,12 +178,19 @@ def calculateZ(relative):
 	for feature in range(N):
 		Z[feature] = {k: [] for k in range(len(relative[feature]))} #initialize dict of list
 		#for feature in relative[windows]:
-		for bins in relative[feature]:
+		#bins=0
+		p=0
+		#while (i <= len(relative[feature])):
+
+		for bins in relative[feature].keys():
 			#if (relative[feature][bins] == 0.0): #if it's zero do not need to sum anything
 			#	Z[feature][bins]=(st.norm.cdf(0))
 			#else:
-			p=filter(lambda x : x < relative[feature][bins], relative[feature].values()) #check the values of bins smaller than the current one
-			Z[feature][bins]=st.norm.cdf(sum(p))
+			#p=filter(lambda x : x < relative[feature][bins], relative[feature].values()) #check the values of bins smaller than the current one
+			#Z[feature][bins]=st.norm.cdf(sum(p))
+			p+=relative[feature][bins]
+			Z[feature][bins]=st.norm.cdf(p)
+		#	bins+=1
 		
 	return Z
 
@@ -209,8 +216,6 @@ def return2dataset(janela,rawValues,newValues):
 				if float(janela[x,feature]) in rawValues[feature][bins]:
 						janela[x,feature] = newValues[feature][bins][0]
 	return janela
-
-
 
 
 				
@@ -267,7 +272,7 @@ newValues={} #dictionary of features with maps between Zvalues and real values
 
 final={} #this must be the final normalized result
 
-gg=0
+
 for i in range(0,len(batch), windowSize): #
 		
 		jan = batch[i:i+windowSize]		
@@ -284,16 +289,12 @@ for i in range(0,len(batch), windowSize): #
 			numberSamples=(N*windowSize*windowsNumber)
 			histogram,rawValues=(updateHistogram(jan,binsTotal,histogram,rawValues))
 			
-		#	relative=(relativeFreq(histogram,numberSamples))
-		#	Zvalues=(calculateZ(relative))
-		#	newValues=backZ2values(rawValues,Zvalues)
+		relative=(relativeFreq(histogram,numberSamples))
+		Zvalues=(calculateZ(relative))
+		newValues=backZ2values(rawValues,Zvalues)
 
-		#final=return2dataset(jan,rawValues,newValues)
-		print rawValues[23]
-		gg+=jan[:,23].tolist().count('14')
-		print gg
-		print windowsNumber
-		print localMax[23]
+		final=return2dataset(jan,rawValues,newValues)
+		
 	 	windowsNumber+=1 #incrementing this number
 
 
