@@ -177,21 +177,22 @@ def calculateZ(relative):
 	Z={}
 	for feature in range(N):
 		Z[feature] = {k: [] for k in range(len(relative[feature]))} #initialize dict of list
-		#for feature in relative[windows]:
-		#bins=0
 		p=0
-		#while (i <= len(relative[feature])):
-
 		for bins in relative[feature].keys():
-			#if (relative[feature][bins] == 0.0): #if it's zero do not need to sum anything
-			#	Z[feature][bins]=(st.norm.cdf(0))
-			#else:
 			#p=filter(lambda x : x < relative[feature][bins], relative[feature].values()) #check the values of bins smaller than the current one
 			#Z[feature][bins]=st.norm.cdf(sum(p))
 			p+=relative[feature][bins]
-			Z[feature][bins]=st.norm.cdf(p)
-		#	bins+=1
-		
+			norm=st.norm.ppf(p)
+			if float('Inf') == norm:
+				Z[feature][bins]=3.4
+				print 'infinit'
+				print Z[feature][bins]
+			if -float('Inf') == norm:
+				Z[feature][bins]=-3.4
+				print 'minus infinit'
+			else:
+				Z[feature][bins]=norm
+			
 	return Z
 
 def backZ2values(rawValues,Zvalues):
@@ -289,7 +290,7 @@ for i in range(0,len(batch), windowSize): #
 			numberSamples=(N*windowSize*windowsNumber)
 			histogram,rawValues=(updateHistogram(jan,binsTotal,histogram,rawValues))
 			
-		relative=(relativeFreq(histogram,numberSamples))
+		relative=(relativeFreq(histogram,1000))
 		Zvalues=(calculateZ(relative))
 		newValues=backZ2values(rawValues,Zvalues)
 
@@ -299,15 +300,15 @@ for i in range(0,len(batch), windowSize): #
 
 
 
-t=0
-for i in range(len(histogram)):
-	for j in histogram[i]:
-		#if (histogram[i].values().count(0) > 7):
-		#	f=1000
-		#else:
-		f=sum(histogram[i].values())
-	t+=f
-	if f != 1000:
-		print i
-		print f
+# t=0
+# for i in range(len(histogram)):
+# 	for j in histogram[i]:
+# 		#if (histogram[i].values().count(0) > 7):
+# 		#	f=1000
+# 		#else:
+# 		f=sum(histogram[i].values())
+# 	t+=f
+# 	if f != 1000:
+# 		print i
+# 		print f
 
