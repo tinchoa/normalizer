@@ -182,17 +182,16 @@ def calculateZ(relative):
 			#p=filter(lambda x : x < relative[feature][bins], relative[feature].values()) #check the values of bins smaller than the current one
 			#Z[feature][bins]=st.norm.cdf(sum(p))
 			p+=relative[feature][bins]
+			if p > 1.0:
+				p=1.0
 			norm=st.norm.ppf(p)
-			if float('Inf') == norm:
-				Z[feature][bins]=3.4
-				print 'infinit'
-				print Z[feature][bins]
-			if -float('Inf') == norm:
-				Z[feature][bins]=-3.4
-				print 'minus infinit'
+			if np.isinf(norm):
+				if float('Inf') == norm:
+					Z[feature][bins]=3.4
+				if -float('Inf') == norm:
+					Z[feature][bins]=-3.4
 			else:
 				Z[feature][bins]=norm
-			
 	return Z
 
 def backZ2values(rawValues,Zvalues):
@@ -311,4 +310,6 @@ for i in range(0,len(batch), windowSize): #
 # 	if f != 1000:
 # 		print i
 # 		print f
+
+
 
