@@ -23,8 +23,7 @@ def getValues(janela):
 		sigmin.append(np.std(column)) 
 	return vmax,vmin,umean,sigmin
 
-
-def calGlobal(localMax,localMin,localMean,localStd): 
+#def calGlobal(localMax,localMin,localMean,localStd): 
 	'''here we will update the value of the local and calculate the global
 	   the values of alpha are to give more importance to the new batches without forget the old values
 	'''
@@ -75,17 +74,13 @@ def calGlobal(localMax,localMin,localMean,localStd):
 	globalMax[0]=auxTestMax
 	globalMin[0]=auxTestMin
 	
-def normalizing(janela):
+def normalizing(janela,refMax,refMin):
 	# normalized = (x-min(x))/(max(x)-min(x))
+	global N
 
-	global globalMax 
-	global globalMin 
-	global globalMean
-	global globalStd 
-
-	for i in range(39):
-		aux=np.subtract(janela[:,i].astype(np.float64),globalMin[0][i])
-		aux2=np.subtract(globalMax[0][i],globalMin[0][i])
+	for i in range(N):
+		aux=np.subtract(janela[:,i].astype(np.float64),refMin[i])
+		aux2=np.subtract(refMax[i],refMin[i])
 		if (aux2 == 0):
 			janela[:,i]=0.5 #https://docs.tibco.com/pub/spotfire/7.0.0/doc/html/norm/norm_scale_between_0_and_1.htm
 			#If Emax is equal to Emin then Normalized (ei) is set to 0.5.
@@ -94,61 +89,53 @@ def normalizing(janela):
 
 	return janela
 
-
-def updateHisto(histo,janela):
+def verifyMetrics(localMax,localMin,refMax,refMin):
 	'''
-	function to update the values of the histogram we are mantaining
+	function to verify if the values of the current chunks are different that references. (procedure metrics in paper)
 	'''
+	global N
 	global windowSize
+	global m1 #metric1 treshold 
+	global m2 #metric2 threshold
+	metric1 = False
+	metric2 = False
+	metric1Counter = 0
+	for i in range(N):
+		if (localMin[i] < refMin[i]):
+			metric1Counter+=1
+		if (localMax[i] > refMax[i]):
+			metric1Counter+=1
+		if ((refMin[i]-localMin[i])/refMin[i] > m2):
+			metric2 = True
+		if ((localMax[i]-refMax[i])/refMax[i] > m2):
+			metric2 = True
+	if (metric1Counter/windowSize > m1):
+		metric1 = True
 
-	for j in range(39):
-		aux=np.sum(janela[:,j].astype(np.float64))
-		aux2=aux+histo[j]
-		histo[j]=np.nan_to_num(np.divide(aux2,windowSize))
+	return metric1,metric2
 
-	return histo
-		
-def tabelaZ(histo):
-	'''
-	get the values of the histogram and pass them to a Z table value
-	'''
 	
-	new={}
-	aux=0
-	for i in range(len(histogram)):
-		for j in range(len(histogram)):
-			if histogram[i] > histogram[j]: #check the values with minor relative frequency 
-				aux+=histogram[j] #then sum
-			else:
-				aux=histogram[i]
-		print aux
-		new[i]=st.norm.ppf(aux) ##Z table with mean 0 std 1
-		aux=0
-
-	j=np.histogram(new.values(),bins=6)
-
-	return test
-
-
-
 #main
 
 
 
 global windowSize
-windowSize=30
+windowSize=250 #as paper
 
 global N
 N=39 #number of features
 
+
+global m1 #metric1 treshold 
+global m2 #metric2 threshold
+
+m1=0.05
+m2=0.05
+
 numberBins=math.ceil(math.sqrt(N))
 
-
 windowsNumber = 0
-globalMax  = []
-globalMin  = []
-globalMean = []
-globalStd  = []
+
 
 janMax  = [] #janela de valores medios. Vou manter N valores 
 janMin  = []
@@ -185,20 +172,23 @@ jan=[]  #take a windows everytime we have a batch
 test=[]
 
 for i in range(0,len(batch), windowSize): #
-		windowsNumber+=1 #incrementing this number
 		jan = batch[i:i+windowSize]		
-		test=jan
-		localMax,localMin,localMean,localStd = getValues(jan)
 		#calGlobal(localMax,localMin,localMean,localStd)
 
+		if windowsNumber == 0:
+			refMax,refMin,localMean,localStd = getValues(jan)
+			salida=normalizing(jan,refMax,refMin)
+		else:
+			localMax,localMin,localMean,localStd=getValues(jan)
+			metric1,metric2=verifyMetrics(localMax,localMin,refMax,refMin)
+			if (metric1 == True and metric2 == True):
+				refMax=localMax
+				refMin=localMin
+			
+			salida=normalizing(jan,refMax,refMin)
 		
-		#x.append(normalizing(test))
-		for j in range(N):
-			aux=np.subtract(jan[:,j].astype(np.float64),localMin[j])
-			aux2=np.subtract(localMax[j],localMin[j])
-			jan[:,j]=np.divide(aux,aux2)	
+		windowsNumber+=1 #incrementing this number
 
-		histogram=updateHisto(histogram,test)
-		p=tabelaZ(histogram)
+	#	p=tabelaZ(histogram)
 
 
