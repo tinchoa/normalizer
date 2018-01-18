@@ -32,6 +32,22 @@ class Original:
 		for i in lines:
 			batch.append(dataPrepare(i))
 
+		saida = open("max-min-classes-17-norm.out", "w")
+
+		salida=calculate(batch)
+
+		''' to write in file'''
+		for k in salida:
+			tmp = []
+			for l in k:
+				tmp.append(str(l))
+			linhaSaida =  ",".join(tmp)
+			saida.write(linhaSaida+"\n")
+
+		end=time.time()-beg
+
+		saida.write(str('processing time : '+str(end)))
+
 		return calculate(batch)
 
 

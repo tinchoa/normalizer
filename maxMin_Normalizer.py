@@ -14,7 +14,8 @@ class maxMin_Normalizer:
 
 	def run(self):
 		beg=time.time()
-	
+		
+		#output=str(sys.argv[1])+'max-min'
 		def dataPrepare(item):
 			''' get the values, remove the categorical data'''
 			a=item.split(',')
@@ -166,7 +167,7 @@ class maxMin_Normalizer:
 		for j in range(N):
 			histogram[j]=0
 
-		files=open('classes-17.out','r')
+		files=open('classes-17-reduced.out','r')
 		saida = open("max-min-classes-17-norm.out", "w")
 
 		lines=files.readlines()
@@ -222,23 +223,24 @@ class maxMin_Normalizer:
 		salida=np.asfarray(salida)
 		salidaNew = [lower + (upper - lower) * x for x in salida]			
 		
+	#	end=time.time()-beg
+
+
+
+
+		''' to write in file'''
+		for k in salida:
+			tmp = []
+			for l in k:
+				tmp.append(str(l))
+			linhaSaida =  ",".join(tmp)
+			saida.write(linhaSaida+"\n")
+
 		end=time.time()-beg
 
+		saida.write(str('processing time : '+str(end)))
+
 		return salidaNew,end
-
-
-
-		# ''' to write in file'''
-		# for k in salida:
-		# 	tmp = []
-		# 	for l in k:
-		# 		tmp.append(str(l))
-		# 	linhaSaida =  ",".join(tmp)
-		# 	saida.write(linhaSaida+"\n")
-
-		# end=time.time()-beg
-
-		# saida.write(str('processing time : '+str(end)))
 
 
 		'''
