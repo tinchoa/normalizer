@@ -21,7 +21,7 @@ class Original:
 			X_normalized = preprocessing.normalize(original, norm='max')
 			lower, upper = -3.09, 3.09
 			X_normed = [lower + (upper - lower) * x for x in X_normalized]
-			return X_normed
+			return X_normalized
 		
 		np.set_printoptions(precision=3)
 		np.set_printoptions(suppress=True,formatter={'float_kind':'{:f}'.format})

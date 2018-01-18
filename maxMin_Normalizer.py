@@ -218,7 +218,7 @@ class maxMin_Normalizer:
 				if (windowsNumber % 1000) == 0:
 					print "windowsNumber: "+str(windowsNumber)
 
-		lower, upper = -3.09, 3.09
+		lower, upper = 0, 1
 		salida=np.asfarray(salida)
 		salidaNew = [lower + (upper - lower) * x for x in salida]			
 		
