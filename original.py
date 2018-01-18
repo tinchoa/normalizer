@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.stats as st
-import math
+import math,time
 from sklearn import preprocessing
 
 class Original:
@@ -8,6 +8,7 @@ class Original:
 	#	super(Original, self).__init__()
 
 	def run(self):
+		beg=time.time()
 		def dataPrepare(item):
 			''' get the values, remove the categorical data'''
 			a=item.split(',')
