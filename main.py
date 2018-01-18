@@ -17,7 +17,7 @@ class Main:
 	def run(self):
 		beg=time.time()
 
-		data = open("classes-17-reduced.out", "r")
+		data = open("classes-17.out", "r")
 		saida = open("classes-17-norm-histo.out", "w")
 		tamanhoJanela = int(sys.argv[1]) #as paper
 		

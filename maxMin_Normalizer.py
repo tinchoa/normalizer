@@ -140,8 +140,8 @@ class maxMin_Normalizer:
 
 
 		global windowSize
-		windowSize=int(sys.argv[1]) #as paper
-		#windowSize=50
+		#windowSize=int(sys.argv[1]) #as paper
+		windowSize=50
 		global N
 		N=40 #number of features
 
@@ -167,7 +167,7 @@ class maxMin_Normalizer:
 		for j in range(N):
 			histogram[j]=0
 
-		files=open('classes-17-reduced.out','r')
+		files=open('classes-17.out','r')
 		saida = open("max-min-classes-17-norm.out", "w")
 
 		lines=files.readlines()
@@ -185,13 +185,7 @@ class maxMin_Normalizer:
 
 		print 'file loaded'
 
-
-		x=[]
-		#def janela(batch): #janela = [e[i:i+windowSize] for i in range(len(e))]
-		''' calculate the sliding windows batch and send to obtain the values'''
-
 		jan=[]  #take a windows everytime we have a batch
-		test=[]
 
 		beg=time.time()
 		for i in range(0,len(batch), windowSize): #
@@ -208,39 +202,40 @@ class maxMin_Normalizer:
 						refMax=localMax
 						refMin=localMin
 					
-				t=normalizing(jan,refMax,refMin)		
+					t=normalizing(jan,refMax,refMin)		
 
-				if windowsNumber==0:
-					salida=t
-				else:
+				
+
+				if windowsNumber!=0:
 					salida=np.vstack((salida,t))
 				
 				windowsNumber+=1 #incrementing this number
 				if (windowsNumber % 1000) == 0:
 					print "windowsNumber: "+str(windowsNumber)
 
-		lower, upper = 0, 1
-		salida=np.asfarray(salida)
-		salidaNew = [lower + (upper - lower) * x for x in salida]			
+	#	lower, upper = 0, 1
+	#	salida=np.asfarray(salida)
+	#	salidaNew = [lower + (upper - lower) * x for x in salida]			
 		
-	#	end=time.time()-beg
+		end=time.time()-beg
 
 
 
 
 		''' to write in file'''
-		for k in salida:
-			tmp = []
-			for l in k:
-				tmp.append(str(l))
-			linhaSaida =  ",".join(tmp)
-			saida.write(linhaSaida+"\n")
+		# for k in salida:
+		# 	tmp = []
+		# 	for l in k:
+		# 		tmp.append(str(l))
+		# 	linhaSaida =  ",".join(tmp)
+		# 	saida.write(linhaSaida+"\n")
 
-		end=time.time()-beg
+		# end=time.time()-beg
 
-		saida.write(str('processing time : '+str(end)))
+		# saida.write(str('processing time : '+str(end)))
 
-		return salidaNew,end
+		# saida.close()
+		return salida,end
 
 
 		'''

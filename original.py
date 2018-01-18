@@ -26,7 +26,7 @@ class Original:
 		
 		np.set_printoptions(precision=3)
 		np.set_printoptions(suppress=True,formatter={'float_kind':'{:f}'.format})
-		files=open('classes-17-reduced.out','r')
+		files=open('classes-17.out','r')
 		lines=files.readlines()
 		self.batch=[]
 		batch=self.batch
