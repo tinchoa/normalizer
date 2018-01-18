@@ -140,8 +140,8 @@ class maxMin_Normalizer:
 
 
 		global windowSize
-		#windowSize=int(sys.argv[1]) #as paper
-		windowSize=50
+		windowSize=int(sys.argv[1]) #as paper
+		#windowSize=50
 		global N
 		N=40 #number of features
 
