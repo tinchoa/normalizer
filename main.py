@@ -93,8 +93,14 @@ class Main:
 if __name__ == "__main__":
 
 	output_file=open(str(sys.argv[1])+'-output','w')
+	print 'proposal starting... '+'\n'
 	proposal,timeProposal=Main().run()
+	print 'proposal finished... '+'\n'
+	
+	print 'original started...'+'\n'
 	old=Original().run()	
+
+	print 'maxMin started....'+'\n'
 	maxMin,timeMaxmin=maxMin_Normalizer().run()
 	
 	'''
