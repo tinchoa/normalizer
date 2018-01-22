@@ -115,9 +115,11 @@ if __name__ == "__main__":
 	 	original_proposal.append(mean_squared_error(original[:,i],proposal[:,i]))
 	 	original_max.append(mean_squared_error(original[:,i],maxMin[:,i]))
 	
-	MSEproposal=mean_squared_error(original,proposal)
-	MSEmaxMin=mean_squared_error(original,maxMin)
+	#MSEproposal=mean_squared_error(original,proposal)
+	#MSEmaxMin=mean_squared_error(original,maxMin)
 
+	MSEproposal=sum(original_proposal)/float(len(original_proposal))
+	MSEmaxMin=sum(original_max)/float(len(original_max))
 
 	output_file.write(str(MSEproposal)+','+str(timeProposal)+'\n')
 	#output_file.write('Proposal Procesing time: '+ str(timeProposal)+'\n')

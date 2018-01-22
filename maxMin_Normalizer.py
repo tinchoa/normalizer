@@ -37,58 +37,6 @@ class maxMin_Normalizer:
 				sigmin.append(np.std(column)) 
 			return vmax,vmin,umean,sigmin
 
-		#def calGlobal(localMax,localMin,localMean,localStd): 
-			'''here we will update the value of the local and calculate the global
-			   the values of alpha are to give more importance to the new batches without forget the old values
-			
-			global globalMax #final values, after calculate the equ. this is gonna be a 1*n (n==len(batch[0]))
-			global globalMin 
-			global globalMean
-			global globalStd 
-			global windowsNumber #only to keep the value of the windows, could be deleted
-			global janMax  #windows with averages values
-			global janMin  
-			global janMean 
-			global janStd  
-			global N
-			
-			alpha1 = 0.9
-
-			n = len(janMax) # should be # number of elements to take into the mean windows
-			
-
-			if n < 5: #first case, we dont have anything
-			 	if n == 0:
-					janMax.append(localMax)
-		 			globalMax.append(localMax)
-		 			janMin.append(localMin)
-		 			globalMin.append(localMin)
-			 	else:
-			 		janMax.append(localMax)
-			 		janMin.append(localMin)
-
-			else: #to keep only 5 values in the window
-				janMax.pop(0)
-				janMax.append(localMax)
-				janMin.pop(0)
-				janMin.append(localMin)
-			
-			auxMax=np.array(janMax)
-			auxMin=np.array(janMin)
-
-			auxTestMax=[]
-			auxTestMin=[]
-			
-			for i in range(N):
-				janelaMediaMax= float(sum(auxMax[:,i][0:len(auxMax)])/float(len(auxMax))) # sum of a from 0 index to 9 index. sum(a) == sum(a[0:len(a)]
-				janelaMediaMin= float(sum(auxMin[:,i][0:len(auxMin)])/float(len(auxMin))) # sum of a from 0 index to 9 index. sum(a) == sum(a[0:len(a)]
-
-				auxTestMax.append((janelaMediaMax*alpha1)+((1-alpha1)*localMax[i]))
-				auxTestMin.append((janelaMediaMin*alpha1)+((1-alpha1)*localMin[i]))
-
-			globalMax[0]=auxTestMax
-			globalMin[0]=auxTestMin
-			'''
 		
 		def normalizing(janela,refMax,refMin):
 			# normalized = (x-min(x))/(max(x)-min(x))
