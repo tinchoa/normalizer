@@ -50,6 +50,10 @@ class maxMin_Normalizer:
 					#If Emax is equal to Emin then Normalized (ei) is set to 0.5.
 				else:
 					janela[:,i]=np.nan_to_num(np.divide(aux,aux2).tolist())
+				for j in range(len(janela[:,i])):
+					if janela[:,i][j]>1:
+						janela[:,i][j]=1
+
 
 			return janela
 
