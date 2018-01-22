@@ -51,7 +51,7 @@ class maxMin_Normalizer:
 				else:
 					janela[:,i]=np.nan_to_num(np.divide(aux,aux2).tolist())
 				for j in range(len(janela[:,i])):
-					if janela[:,i][j]>1:
+					if float(janela[:,i][j])>1:
 						janela[:,i][j]=1
 
 
