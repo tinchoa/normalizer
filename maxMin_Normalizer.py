@@ -171,18 +171,18 @@ class maxMin_Normalizer:
 
 
 		''' to write in file'''
-		# for k in salida:
-		# 	tmp = []
-		# 	for l in k:
-		# 		tmp.append(str(l))
-		# 	linhaSaida =  ",".join(tmp)
-		# 	saida.write(linhaSaida+"\n")
+		for k in salida:
+			tmp = []
+			for l in k:
+				tmp.append(str(l))
+			linhaSaida =  ",".join(tmp)
+			saida.write(linhaSaida+"\n")
 
-		# end=time.time()-beg
+		end=time.time()-beg
 
-		# saida.write(str('processing time : '+str(end)))
+		saida.write(str('processing time : '+str(end)))
 
-		# saida.close()
+		saida.close()
 		return salida,end
 
 
