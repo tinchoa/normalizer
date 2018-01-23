@@ -107,6 +107,10 @@ class Histograma:
                 else:
                     break
             b +=1
+
+        return self.hist
+        
+
             
     def normalizedHistograma (self):
         normalizedHist = []
