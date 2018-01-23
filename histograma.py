@@ -108,6 +108,8 @@ class Histograma:
                     break
             b +=1
 
+    def visualizeHistograma(self):
+
         return self.hist
 
             
