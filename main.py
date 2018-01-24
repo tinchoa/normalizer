@@ -92,7 +92,7 @@ class Main:
 
 
 		##return hists,end #to retunr the object
-		return resultado,end
+		return resultados,end
 	# 	#print janela
 	
 
