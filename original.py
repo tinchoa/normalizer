@@ -33,7 +33,7 @@ class Original:
 		for i in lines:
 			batch.append(dataPrepare(i))
 
-		saida = open("max-min-classes-17-norm.out", "w")
+		saida = open("Original-classes-17-norm.out", "w")
 
 		salida=calculate(batch)
 

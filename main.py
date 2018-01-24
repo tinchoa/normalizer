@@ -19,7 +19,7 @@ class Main:
 		beg=time.time()
 
 		data = open("classes-17.out", "r")
-#		saida = open("classes-17-norm-histo.out", "w")
+		saida = open("classes-17-norm-histo.out", "w")
 		#tamanhoJanela = int(sys.argv[1]) #as paper
 		tamanhoJanela=500
 		self.hists = []
@@ -73,15 +73,15 @@ class Main:
 	
 
 
-	# 		for k in resultados:
-	# 			tmp = []
-	# 			tmp2= []
-	# 	 		for l in k:
-	# 	 			tmp.append(str(l))
-	# 	 			tmp2.append(l)
+	 		for k in resultados:
+	 			tmp = []
+	 			tmp2= []
+	 	 		for l in k:
+	 	 			tmp.append(str(l))
+	 	 			tmp2.append(l)
 	 	 		resFinal.append(tmp2)
-	# 	 		linhaSaida =  ",".join(tmp)
-	# #	 		saida.write(linhaSaida+"\n")
+	 	 		linhaSaida =  ",".join(tmp)
+	 	 		saida.write(linhaSaida+"\n")
 			
 		end=time.time()-beg
 
