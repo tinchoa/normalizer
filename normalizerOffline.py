@@ -6,7 +6,7 @@ from sklearn import preprocessing
 
 class normalizer:
 
-	def run():
+	def run(self):
 		w = open("/tmp/classes-17-norm-offline.out",'w')
 		f = open("classes-17.out",'r')
 		linha = f.readline()
