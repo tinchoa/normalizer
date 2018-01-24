@@ -97,7 +97,7 @@ class Main:
 
 if __name__ == "__main__":
 
-	# output_file=open(str(sys.argv[1])+'-output','w')
+	output_file=open(str(sys.argv[1])+'-output','w')
 	print 'proposal starting... '+'\n'
 	proposal,timeProposal=Main().run()
 	print 'proposal finished... '+'\n'
@@ -126,10 +126,10 @@ if __name__ == "__main__":
 	MSEproposal=sum(original_proposal)/float(len(original_proposal))
 	MSEmaxMin=sum(original_max)/float(len(original_max))
 
-	# output_file.write(str(MSEproposal)+','+str(timeProposal)+'\n')
+	output_file.write(str(MSEproposal)+','+str(timeProposal)+'\n')
 	# #output_file.write('Proposal Procesing time: '+ str(timeProposal)+'\n')
-	# output_file.write(str(MSEmaxMin)+','+str(timeMaxmin)+'\n')
+	output_file.write(str(MSEmaxMin)+','+str(timeMaxmin)+'\n')
 	# #output_file.write('MaxMin Procesing time: '+ str(timeMaxmin)+'\n')
 
 
-	#output_file.close()
+	output_file.close()
