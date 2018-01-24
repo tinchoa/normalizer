@@ -41,8 +41,6 @@ class Main:
 			#processa janela
 			#print len(janela)
 			
-			
-			
 			features = []
 			
 			for i in range(len(janela)):
@@ -81,7 +79,7 @@ class Main:
 	# 	 		for l in k:
 	# 	 			tmp.append(str(l))
 	# 	 			tmp2.append(l)
-	# 	 		resFinal.append(tmp2)
+	 	 		resFinal.append(tmp2)
 	# 	 		linhaSaida =  ",".join(tmp)
 	# #	 		saida.write(linhaSaida+"\n")
 			
@@ -92,7 +90,7 @@ class Main:
 
 
 		##return hists,end #to retunr the object
-		return resultados,end
+		return resFinal,end
 	# 	#print janela
 	
 
