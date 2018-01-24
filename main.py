@@ -1,6 +1,6 @@
 from histograma import Histograma
-#from original import Original
-from normalizerOffline import normalizer
+from original import Original
+#from normalizerOffline import normalizer
 from maxMin_Normalizer import maxMin_Normalizer
 
 '''
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 	print 'proposal finished... '+'\n'
 	
 	print 'original started...'+'\n'
-	old=normalizer().run()	
+	old=Original().run()	
 
 	print 'maxMin started....'+'\n'
 	maxMin,timeMaxmin=maxMin_Normalizer().run()
