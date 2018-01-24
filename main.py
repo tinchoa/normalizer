@@ -1,5 +1,6 @@
 from histograma import Histograma
-from original import Original
+#from original import Original
+from normalizerOffline import normalizer
 from maxMin_Normalizer import maxMin_Normalizer
 
 '''
@@ -19,8 +20,8 @@ class Main:
 
 		data = open("classes-17.out", "r")
 #		saida = open("classes-17-norm-histo.out", "w")
-		tamanhoJanela = int(sys.argv[1]) #as paper
-		
+		#tamanhoJanela = int(sys.argv[1]) #as paper
+		tamanhoJanela=500
 		self.hists = []
 		hists = self.hists
 		
@@ -59,6 +60,12 @@ class Main:
 				#    print j, "hist", hists[j].hist, hists[j].pivo
 					#print features[j]
 			
+	#	end=time.time()-beg			
+
+
+
+	#	return hists,end
+
 			resultados = []
 	
 			for i in range(len(janela)):
@@ -68,37 +75,37 @@ class Main:
 	
 
 
-			for k in resultados:
-				tmp = []
-				tmp2= []
-		 		for l in k:
-		 			tmp.append(str(l))
-		 			tmp2.append(l)
-		 		resFinal.append(tmp2)
-		 		linhaSaida =  ",".join(tmp)
-	#	 		saida.write(linhaSaida+"\n")
+	# 		for k in resultados:
+	# 			tmp = []
+	# 			tmp2= []
+	# 	 		for l in k:
+	# 	 			tmp.append(str(l))
+	# 	 			tmp2.append(l)
+	# 	 		resFinal.append(tmp2)
+	# 	 		linhaSaida =  ",".join(tmp)
+	# #	 		saida.write(linhaSaida+"\n")
 			
 		end=time.time()-beg
 
-		# saida.write(str('processing time : '+str(end))+'\n')
+	# 	# saida.write(str('processing time : '+str(end))+'\n')
 			
 
 
-		return resFinal,end
+		return hists,end
 
-		#print janela
+	# 	#print janela
 	
 
 
 if __name__ == "__main__":
 
-	output_file=open(str(sys.argv[1])+'-output','w')
+	# output_file=open(str(sys.argv[1])+'-output','w')
 	print 'proposal starting... '+'\n'
 	proposal,timeProposal=Main().run()
 	print 'proposal finished... '+'\n'
 	
 	print 'original started...'+'\n'
-	old=Original().run()	
+	old=normalizer().run()	
 
 	print 'maxMin started....'+'\n'
 	maxMin,timeMaxmin=maxMin_Normalizer().run()
@@ -106,25 +113,25 @@ if __name__ == "__main__":
 	'''
 	to calculate the mean square error
 	'''
-	original_proposal=[]
-	original_max=[]
+	# original_proposal=[]
+	# original_max=[]
 	original=np.asfarray(old)
 	proposal=np.asfarray(proposal)
 	maxMin=np.asfarray(maxMin)
 	for i in range(len(proposal[0])):
-	 	original_proposal.append(mean_squared_error(original[:,i],proposal[:,i]))
-	 	original_max.append(mean_squared_error(original[:,i],maxMin[:,i]))
+	  	original_proposal.append(mean_squared_error(original[:,i],proposal[:,i]))
+	  	original_max.append(mean_squared_error(original[:,i],maxMin[:,i]))
 	
-	#MSEproposal=mean_squared_error(original,proposal)
-	#MSEmaxMin=mean_squared_error(original,maxMin)
+	# #MSEproposal=mean_squared_error(original,proposal)
+	# #MSEmaxMin=mean_squared_error(original,maxMin)
 
 	MSEproposal=sum(original_proposal)/float(len(original_proposal))
 	MSEmaxMin=sum(original_max)/float(len(original_max))
 
-	output_file.write(str(MSEproposal)+','+str(timeProposal)+'\n')
-	#output_file.write('Proposal Procesing time: '+ str(timeProposal)+'\n')
-	output_file.write(str(MSEmaxMin)+','+str(timeMaxmin)+'\n')
-	#output_file.write('MaxMin Procesing time: '+ str(timeMaxmin)+'\n')
+	# output_file.write(str(MSEproposal)+','+str(timeProposal)+'\n')
+	# #output_file.write('Proposal Procesing time: '+ str(timeProposal)+'\n')
+	# output_file.write(str(MSEmaxMin)+','+str(timeMaxmin)+'\n')
+	# #output_file.write('MaxMin Procesing time: '+ str(timeMaxmin)+'\n')
 
 
-	output_file.close()
+	#output_file.close()
