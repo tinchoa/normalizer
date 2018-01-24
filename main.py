@@ -113,8 +113,8 @@ if __name__ == "__main__":
 	'''
 	to calculate the mean square error
 	'''
-	# original_proposal=[]
-	# original_max=[]
+	original_proposal=[]
+	original_max=[]
 	original=np.asfarray(old)
 	proposal=np.asfarray(proposal)
 	maxMin=np.asfarray(maxMin)
