@@ -91,8 +91,8 @@ class Main:
 			
 
 
-		return hists,end
-
+		##return hists,end #to retunr the object
+		return resultado,end
 	# 	#print janela
 	
 
