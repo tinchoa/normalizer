@@ -36,8 +36,8 @@ class normalizer:
 		            else: vetor[i] = 0.5
 		    linha = f.readline()
 			#armazanar em arquivo
-		    #vetorStr = [str(i) for i in vetor]
-		    #w.write(",".join(vetorStr)+"\n")
+		   	vetorStr = [str(i) for i in vetor]
+		    w.write(",".join(vetorStr)+"\n")
 		    salida.append(vetor)
 		
 		for i in range(len(salida)):
