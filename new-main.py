@@ -14,7 +14,7 @@ from sklearn.metrics import mean_squared_error
 
 ####ate aqui
 
-class Main:
+class NewMain:
 	def run(self,data,flag): #flag =1 streamning, flag=0 batch
 		beg=time.time()
 
