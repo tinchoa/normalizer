@@ -1,7 +1,7 @@
-import numpy as np
 import scipy.stats as st
 import math,time
 from sklearn import preprocessing
+import numpy as np
 
 class Original:
 	#def __init__(self):
