@@ -1,10 +1,16 @@
+'''
+Machine Learning Models
+'''
 from sklearn import svm
 from sklearn.linear_model import SGDClassifier
 from sklearn import tree
+from sklearn.naive_bayes import GaussianNB
 import csv
 import numpy as np
 from newmain import NewMain 
 from maxMin_Normalizer import maxMin_Normalizer
+from NewmaxMin import *
+
 
 '''
 normalizer do sklearner
@@ -16,8 +22,10 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import average_precision_score
 from sklearn.metrics import classification_report
-from imblearn.over_sampling import SMOTE #to balance training dataset
 
+#to balance training dataset
+from imblearn.over_sampling import SMOTE 
+from imblearn.over_sampling import ADASYN 
 def correlationCalculate(vectors):
 
 	cof=np.corrcoef(np.array(vectors),rowvar=False)
@@ -72,43 +80,55 @@ def dataPreparing(linhas):
 
 def dataSampling(dados,label):
 
-	sm = SMOTE(ratio='minority') #to sample data
+	#sm = SMOTE(ratio='minority') #to sample data
+	sm = ADASYN(ratio='minority')
 	dadosSample,labelSample=sm.fit_sample(dados,label)
 
 	return dadosSample,labelSample
 
-def traininML(dados,label):
+def traininML(dados,label,flag=0):
 	'''
 	normalize,feature selection and SMV model training
 	'''
-	dadosSample,labelSample=dataSampling(dados,label)
 
-	'''
-	normalize the data (with our implementation)
-	'''
-	print 'normalizing...'
-	#normalize=NewMain().run(dadosSample,0)
-	#normalize=maxMin_Normalizer().run()
-	normalize=Normalizer().fit_transform(linhast)
-	print 'done...'
-	'''
-	reduced with feature selection
-	'''
+	if (flag==0):
+		dadosSample,labelSample=dataSampling(dados,label)
 
-	reduced,index=correlationCalculate(normalize)
+		'''
+		normalize the data (with our implementation)
+		'''
+
+		
+		print 'normalizing...'
+		normalize=NewMain().run(dadosSample,0)
+		#normalize=maxMin_Normalizer().run()
+		#normalize=Normalizer().fit_transform(dadosSample)
+		#normalize=norm.run(dadosSample,0,0)
+
+		print 'done...'
+		'''
+		reduced with feature selection
+		'''
+		reduced,index=correlationCalculate(normalize)
+		
+		data2train=reduced
+		label=labelSample
+	else:
+		data2train,index=correlationCalculate(dados)
 
 	'''
 	train SVM model
 	'''	
-	clf = svm.SVC()
+	#clf = svm.SVC(kernel='rbf')
+	#clf = GaussianNB()
 	#clf = SGDClassifier(loss="hinge", penalty="l2")
-	#clf = tree.DecisionTreeClassifier()
-	model=clf.fit(reduced, labelSample)
+	clf = tree.DecisionTreeClassifier()
+	model=clf.fit(data2train, label)
 	
 
 	return model,index
 
-
+norm=NewmaxMin()
 train = open("classes-17-reduced.out", "r")
 
 linhas=train.readlines()
@@ -117,9 +137,13 @@ sample,label=dataPreparing(linhas)
 
 modelo,index=traininML(sample,label)
 
+
+
 print 'modelo criado'
 
 features={} #to see the evolution of the features
+
+features[0]=index
 
 label=[]
 dados =[]
@@ -136,7 +160,11 @@ linhas = data.readlines()
 
 linhast,labelt=dataPreparing(linhas)
 
+#dadosSample,labelSample=dataSampling(linhast,labelt)
+
 #linhast,labelSample=dataSampling(linhast,labelt)
+
+metrics={}
 
 for i in range(0,len(linhast), tamanhoJanela): #
 	janela = linhast[i:i+tamanhoJanela]	
@@ -157,23 +185,46 @@ for i in range(0,len(linhast), tamanhoJanela): #
 # 			tmpLabel=1.0
 # 		label.append(tmpLabel)
 # 		linha = data.readline() #creating the window
-
-	#normalize=NewMain().run(janela,0)
-	#normalize=maxMin_Normalizer().run()
+	
 	reduced=MatrixReducer(janela,index)
-	classification=modelo.predict(reduced)
+	normalize=NewMain().run(reduced,0)
+	#normalize=maxMin_Normalizer().run()
+
+	#normalize=norm.run(janela,0,window+1)
+	
+	classification=modelo.predict(normalize)
 #	print classification_report(label,classification)
 	acc[1]=accuracy_score(label,classification)#,normalize==True)
 	pre[1]=average_precision_score(label,classification)#, average='binary')  
 	print 'Ac :'+str(acc[1])
 	print 'Pre :' +str(pre[1])
+	
+	metrics[window]=acc[1],pre[1]
 
-#	if window==0:
-#		acc[0]=acc[1]
+	if window==0:
+		acc[0]=acc[1]
 
-#	if ((acc[0]-acc[1]) < 0.1*acc[1]):	
-#		modelo,index=traininML(janela,label)
-#		reduced,index=correlationCalculate(normalize)
-#		features[window]=index
+	if (acc[0]>acc[1]) and (acc[0]-acc[1] !=0):
+		if (abs(acc[0]-acc[1]) >= 0.05) or acc[1] <0.9:#*acc[1]) :
+			print	'probable concept drift'
+			print window
+			modelo,index=traininML(janela,label,1)
+			#reduced,index=correlationCalculate(normalize)
+			features[window]=index
 	window+=1
 	acc[0]=acc[1]
+
+
+
+'''
+to save in file
+
+
+output2=open('salidaTree.csv','w')
+
+for i in range(len(metrics)):
+
+	output2.write(str(i+1)+','+str(metrics[i][0])+','+str(metrics[i][1])+'\n')
+output2.close()
+
+'''
