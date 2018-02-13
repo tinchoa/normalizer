@@ -17,6 +17,8 @@ def ppf(x):
         if res > 1:
             return 1
         else:
+            if res < 0:
+                res = 0
             return res
     except KeyError:
         return numpy.NAN
