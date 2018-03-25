@@ -92,8 +92,8 @@ class maxMin_Normalizer:
 
 
 		global windowSize
-		windowSize=int(sys.argv[1]) #as paper
-		#windowSize=50
+		#windowSize=int(sys.argv[1]) #as paper
+		windowSize=500
 		global N
 		N=40 #number of features
 
@@ -119,7 +119,7 @@ class maxMin_Normalizer:
 		for j in range(N):
 			histogram[j]=0
 
-		files=open('classes-17.out','r')
+		files=open('classes-17-end.out','r')
 		saida = open("max-min-classes-17-norm.out", "w")
 
 		lines=files.readlines()

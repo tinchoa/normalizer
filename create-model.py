@@ -89,7 +89,7 @@ def traininML(dados,label):
 	print 'normalizing...'
 	#normalize=NewMain().run(dadosSample,0)
 	#normalize=maxMin_Normalizer().run()
-	normalize=Normalizer().fit_transform(linhast)
+	normalize=Normalizer().fit_transform(dadosSample)
 	print 'done...'
 	'''
 	reduced with feature selection
@@ -129,7 +129,7 @@ tamanhoJanela=1000
 acc={}
 pre={}
 
-data = open("classes-17-end.out", "r")
+data = open("classes-25.out", "r")
 #linha = data.readline()
 
 linhas = data.readlines()
@@ -137,6 +137,8 @@ linhas = data.readlines()
 linhast,labelt=dataPreparing(linhas)
 
 #linhast,labelSample=dataSampling(linhast,labelt)
+
+metrics={}
 
 for i in range(0,len(linhast), tamanhoJanela): #
 	janela = linhast[i:i+tamanhoJanela]	
@@ -158,22 +160,69 @@ for i in range(0,len(linhast), tamanhoJanela): #
 # 		label.append(tmpLabel)
 # 		linha = data.readline() #creating the window
 
-	#normalize=NewMain().run(janela,0)
+	normalize=NewMain().run(janela,0)
 	#normalize=maxMin_Normalizer().run()
 	reduced=MatrixReducer(janela,index)
 	classification=modelo.predict(reduced)
 #	print classification_report(label,classification)
 	acc[1]=accuracy_score(label,classification)#,normalize==True)
 	pre[1]=average_precision_score(label,classification)#, average='binary')  
-	print 'Ac :'+str(acc[1])
-	print 'Pre :' +str(pre[1])
+	if len(set(label)) == 2: 
+		tn, fp, fn, tp = confusion_matrix(label,classification).ravel()
+		recall=recall_score(label,classification, average='binary')
+	else: 
+		tn,fp,fn,tp=0,0,0,0
+		recall=0
+	# print 'Ac :'+str(acc[1])
+	# print 'Pre :' +str(pre[1])
+	# print 'FP :' +str(fp)
+	# print 'FN :' +str(fn)
+	# print 'TP :' +str(tp)
+	# print 'TN :' +str(tn)
+	# print 'Recall: '+str(recall)
 
-#	if window==0:
-#		acc[0]=acc[1]
+	metrics[window]=acc[1],pre[1],tn, fp, fn, tp,recall
 
-#	if ((acc[0]-acc[1]) < 0.1*acc[1]):	
-#		modelo,index=traininML(janela,label)
-#		reduced,index=correlationCalculate(normalize)
-#		features[window]=index
+	if window==0:
+		acc[0]=acc[1]
+	drift=[]
+	if ((abs(acc[1]-acc[0])/acc[0]) >0.1) and (acc[0]-acc[1]) !=0:	
+		modelo,index=traininML(janela,label)
+		reduced,index=correlationCalculate(normalize)
+		features[window]=index
+		drift.append(window)
 	window+=1
 	acc[0]=acc[1]
+
+
+
+output2=open('drift/'+'SVM-RBF-nosso-1000.csv','w')
+
+for i in range(len(metrics)):
+
+	output2.write(str(i+1)+','+str(metrics[i][0])+','+str(metrics[i][1])+'\n')
+
+tmp=0
+for i in metrics:
+	tmp+=metrics[i][0]
+avg=tmp/float(len(metrics))
+
+print avg
+
+output2.write(str(avg)+'\n')
+
+
+
+
+output3=open('drift/'+'SVM-RBF-nosso-1000-drift.csv','w')
+
+for i in range(len(features)):
+	output3.write(str(i)+',')
+	for j in range(len(features[i])):
+		output3.write(+str(features[i])+',')
+	output3.write(+str(drift[i][1])+'\n')
+
+
+output2.close()
+output3.close()
+

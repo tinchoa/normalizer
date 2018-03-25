@@ -15,10 +15,10 @@ from sklearn.metrics import mean_squared_error
 ####ate aqui
 
 class Main:
-	def run(self,data,flag): #flag =1 streamning, flag=0 batch
+	def run(self):
 		beg=time.time()
 
-		#data = open("classes-17.out", "r")
+		data = open("classes-17-end.out", "r")
 		saida = open("classes-17-norm-histo.out", "w")
 		#tamanhoJanela = int(sys.argv[1]) #as paper
 		tamanhoJanela=500
@@ -59,9 +59,6 @@ class Main:
 					#print features[j]
 			
 	#	end=time.time()-beg			
-
-
-
 	#	return hists,end
 
 			resultados = []
@@ -97,7 +94,7 @@ class Main:
 
 if __name__ == "__main__":
 
-	output_file=open(str(sys.argv[1])+'-output','w')
+	#output_file=open(str(sys.argv[1])+'-output','w')
 	print 'proposal starting... '+'\n'
 	proposal,timeProposal=Main().run()
 	print 'proposal finished... '+'\n'

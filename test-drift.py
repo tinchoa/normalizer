@@ -47,9 +47,9 @@ from concept_drift.page_hinkley import PageHinkley
 from evaluation.prequential import prequential
 
 #Normalizers
-from newmain import NewMain 
-from maxMin_Normalizer import maxMin_Normalizer
-from NewmaxMin import *
+# from newmain import NewMain 
+# from maxMin_Normalizer import maxMin_Normalizer
+# from NewmaxMin import *
 
 
 '''
@@ -100,31 +100,41 @@ def read_data(file):
 
 n_train = 2000
 X, y = read_data(sys.argv[1])
-w = 1000
+window = [100,200,500,1000,2000]
+
+output=open('test-drift.txt','w')
 
 clfs = [
-		GaussianNB(),
-		DetectorClassifier(GaussianNB(), PageHinkley(), np.unique(y)),
-		DetectorClassifier(GaussianNB(), Adwin(), np.unique(y))
+		MultinomialNB(),
+		#DetectorClassifier(Adwin(), PageHinkley(), np.unique(y)),
+		#GaussianNB(),
+		DetectorClassifier(MultinomialNB(), PageHinkley(), np.unique(y)),
+		DetectorClassifier(MultinomialNB(), Adwin(), np.unique(y))
 	]
-clfs_label = ["GaussianNB", "Page-Hinkley", "ADWIN"]
+clfs_label = ["MultinomialNB",  "Page-Hinkley", "ADWIN"]
 
-plt.title("Accuracy (exact match)")
+#plt.title("Accuracy (exact match)")
 plt.xlabel("Instances")
 plt.ylabel("Accuracy")
 
-for i in range(len(clfs)):
-	print("\n{} :".format(clfs_label[i]))
-	with np.errstate(divide='ignore', invalid='ignore'):
-		y_pre, time = prequential(X, y, clfs[i], n_train)
-	if clfs[i].__class__.__name__ == "DetectorClassifier":
-		print("Drift detection: {}".format(clfs[i].change_detected))
-	estimator = (y[n_train:] == y_pre) * 1
+for w in window:
 
-	acc_run = np.convolve(estimator, np.ones((w,)) / w, 'same')
-	print("Mean acc within the window {}: {}".format(w, np.mean(acc_run)))
-	plt.plot(acc_run, "-", label=clfs_label[i])
+	for i in range(len(clfs)):
+		print("\n{} :".format(clfs_label[i]))
+		with np.errstate(divide='ignore', invalid='ignore'):
+			y_pre, time = prequential(X, y, clfs[i], n_train)
+		if clfs[i].__class__.__name__ == "DetectorClassifier":
+			print("Drift detection: {}".format(clfs[i].change_detected))
+			output.write(str(clfs[i].change_detected)+'\n')
+		estimator = (y[n_train:] == y_pre) * 1
+
+		acc_run = np.convolve(estimator, np.ones((w,)) / w, 'same')
+		print("Mean acc within the window {}: {}".format(w, np.mean(acc_run)))
+		output.write(str(np.mean(acc_run))+'\n')
+		plt.plot(acc_run, "-", label=clfs_label[i])
+
 
 plt.legend(loc='lower right')
 plt.ylim([0, 1])
 plt.show()
+output.close()
